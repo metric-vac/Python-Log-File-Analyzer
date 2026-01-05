@@ -1,0 +1,6 @@
+# THIS IS A TEST FILE FOR THE LOG READER
+
+ERROR Failed login attempt from 192.168.1.10
+WARNING Disk space running low
+CRITICAL Unauthorized access detected
+
