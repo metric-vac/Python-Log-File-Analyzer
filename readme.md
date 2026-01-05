@@ -30,5 +30,5 @@ Designed to practice cybersecurity fundamentals such as log analysis, file parsi
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/python-log-file-analyzer.git
+   git clone https://github.com/metric-vac/Python-Log-File-Analyzer
    cd python-log-file-analyzer
