@@ -31,3 +31,6 @@ Designed to practice cybersecurity fundamentals such as log analysis, file parsi
    ```bash
    git clone https://github.com/metric-vac/Python-Log-File-Analyzer
    cd python-log-file-analyzer
+2. Run the python file:
+   ```python
+   python logreader.py
