@@ -11,8 +11,7 @@ Designed to practice cybersecurity fundamentals such as log analysis, file parsi
 - Supports dynamic keyword filters (add/remove at runtime)
 - Reads and analyzes log files line-by-line
 - Counts occurrences of user-defined severity keywords (e.g., error, warning, critical)
-- Generates a results report saved to an output file
-- Designed for Linux environments
+- Designed for all environments
 
 ---
 
