@@ -1,171 +1,177 @@
 import os
 
-flag_list = ["error", "warning", "critical"]
-result = {flag: 0 for flag in flag_list}
+log_file_name = ""
+filters = {
+    "WARNING": 0,
+    "ERROR": 0,
+    "EMERGENCY": 0,
+    "CRITICAL": 0,
+    "DEBUG": 0,
+    "INFO": 0,
+    "TRACE": 0,
+    "ALERT": 0,
+    "AUDIT": 0,
+    "SECURITY": 0,
+    "NOTICE": 0,
+    "VERBOSE": 0,
+}
+Change_file = False
 
-changed_log = False
-log_file = "test.txt"
+# Clear CLI function
+def clear_screen():
+    os.system("cls" if os.name == "nt" else "clear")
 
-def Sel_log():
-    global log_file
-    global changed_log
-    print("Log selecter selected")
-    print("Enter the name of the log file(with extension)")
-    print()
-    name = input("log? ")
-    
+# Functions for reading log file
+def start():
     try:
-        name = name.lower()
-    except KeyboardInterrupt:
-        print("Thank you for using Log Reader")
-        start()
+        clear_screen()  # Clear screen when starting reading
+
+        if not Change_file:
+            print("You haven't selected a Log file\nReturning to main menu")
+            return
+
+        if not filters:
+            print("Filters are empty, returning to main menu")
+            return
+
+        # Reset filter counts
+        for key in filters:
+            filters[key] = 0
+
+        # Normalize filter keys to uppercase
+        words_to_check = set(key.upper() for key in filters.keys())
+
+        # Try opening the file safely
+        try:
+            with open(log_file_name, "r") as f:
+                for line in f:
+                    line_upper = line.upper()
+                    for word in words_to_check:
+                        if word in line_upper:
+                            filters[word] += 1
+        except FileNotFoundError:
+            print(f"Error: The file '{log_file_name}' was not found.")
+            return
+        except IOError as e:
+            print(f"Error reading file: {e}")
+            return
+
+        print("----- Finished! -----")
+        for word, count in filters.items():
+            print(f"Found {word} {count} times")
+
     except Exception as e:
-        print(f"Unknown Error: {e}")
-        start()
+        print(f"An unexpected error occurred in start(): {e}")
 
 
-    if name == "":
-        print("Nothing has been entered. Sending back to program")
-        start()
-    if os.path.exists(name):
-        log_file = name
-        changed_log = True
-        print(f"{log_file} has been selected")
-        start()
-        
-    else:
-        print(f"File {log_file} doesnt exists, sending to main menu")
-        start()
-
-
-
-def filt_log():
-    print()
-    print("Filter selected")
-    print()
-    print(" ------------------- \n1 - Add Flag\n2 - Remove Flag\n ------------------- ")
-    print()
-
+def edit_filters():
     try:
-        choice = int(input("choice? "))
-        if choice == 1:
-            
-            print()
-            print("Add Filter Selected, Enter the flag")
-            print("Added Filters:")
-            print("----------------")
-            for flag in flag_list:
-                print(flag)
-            print("----------------")
-            print()
-            new_flag = input("flag? ").lower()
-            if new_flag in flag_list:
-                print(f"{new_flag} already exsists, sending to menu")
-                start()
-            else:
-                flag_list.append(new_flag)
-                result[new_flag] = 0
-                start()
+        clear_screen()  # Clear screen when editing filters
+        print("What do you want to do?")
+        print("1 - Add Filters")
+        print("2 - Delete Filters")
+        print("3 - Remove all filters")
+        print("0 - Main menu")
+        print()
+        choice = input("choice? ")
 
-        elif choice == 2:
-            
-            print()
-            print("Remove Filter Selected, Enter the flag")
-            print("Added Filters:")
-            print("----------------")
-            for flag in flag_list:
-                print(flag)
-            print("----------------")
-            print()
-            old_flag = input("flag? ").lower()
-            if old_flag in flag_list:
-                flag_list.remove(old_flag)
-                del result[old_flag]
-                print(f"{old_flag} has been deleted")
-                start()
+        if choice == "1":
+            print("\nType in a filter to add\n")
+            filter_name = input("name? ").upper()
+
+            if filter_name in filters:
+                print(f"{filter_name} is already inside the log file")
             else:
-                print(f"{old_flag} doesnt exists in the list, sending to menu")
-                start()
+                filters[filter_name] = 0
+                print(f"{filter_name} added to filters")
+
+        elif choice == "2":
+            if not filters:
+                print("No filters to delete.")
+                return
+            print("\nType the name of the filter to delete")
+            print("Index\tName")
+            print("-----------------------")
+            for index, word in enumerate(filters):
+                print(f"{index}\t{word}")
+            print("-----------------------\n")
+
+            name = input("name? ").upper()
+            if name in filters:
+                del filters[name]
+                print(f"{name} has been removed from filters")
+            else:
+                print(f"{name} does not exist")
+
+        elif choice == "3":
+            filters.clear()
+            print("Removed every filter")
+
+        elif choice == "0":
+            return
 
         else:
-            print("Nothing was selectws, sending back to menu")
-            start()
-    
-    except ValueError:
-        print(f"{choice} is invalid, sending to main menu")
-        start()
+            print("Invalid choice, returning to menu")
 
+    except Exception as e:
+        print(f"An unexpected error occurred in edit_filters(): {e}")
+
+
+def choose_log():
+    global Change_file
+    global log_file_name
+    try:
+        clear_screen()  # Clear screen when choosing a log
+        log_name = input("Type in the name of the log file: ")
+
+        if os.path.exists(log_name):
+            log_file_name = log_name
+            print(f"{log_name} was chosen")
+            Change_file = True
+        else:
+            print(f"File '{log_name}' doesn't exist. Make sure it's in the same directory as the Python script")
+
+    except Exception as e:
+        print(f"An unexpected error occurred in choose_log(): {e}")
 
 
 def main():
-    if changed_log == False:
-        print("You havent selected the log file, it will read the default txt file in the directory\nare you sure you want to do that?")
-        print()
-        choice = input("yes/no? ").lower()
-        if choice == "no":
-            print("Reading cancelled, senidng back to main menu")
-            start()
-
-
-    with open(log_file, "r") as file:
-        for line in file:                  
-            line_lower = line.lower()
-            for flag in flag_list:         
-                if flag in line_lower:
-                    result[flag] += 1
-
-    
-    print(" --- READING COMPLETE --- ")
-    print()
-    print(" --- Results --- ")
-    with open(f"result_{log_file}.txt", "a") as files:
-        files.write(f"RESULTS OF {log_file}\n")
-        files.write("--------------\n")
-
-        for flag, count in result.items():
-            
-            output_line = f"{flag}: {count}\n"
-            print(output_line, end="")
-            files.write(output_line)
-    
-    print(f"Results have been saved to 'result_{log_file}.txt'")
-    start()
-    
-    
-
-    
-
-
-def start():
-    print()
-    print(" -- Welcome to Log Reader - by Nebil Nasser -- ")
-    print()
-    print("1 - Add Filter")
-    print("2 - Select Log File")
-    print("3 - Start Reading")
-    print("0 - Exit")
-    print()
-
     try:
-        choice = input("choice? ")
-        choice = int(choice)
-        if choice == 1:
-            filt_log()
-        elif choice == 2:
-            Sel_log()
-        elif choice == 3:
-            main()
-        elif choice == 0:
-            print("Thank you for using")
-            quit()
-    except ValueError:
-        print(f"{choice} is not a valid choice, exiting program")
-        quit()
-    except KeyboardInterrupt:
-        print("Thank you for using Log Reader")
-        quit()
-    except Exception as e:
-        print(f"Unknown error: {e}")
-        quit()
+        while True:
+            clear_screen()  # Clear screen each time the main menu is shown
+            print("=================================")
+            print("  Log Reader 1.1 / metric-vac")
+            print("=================================")
+            print()
+            print(f"Log file = {log_file_name if Change_file else 'None'}")
+            print()
+            print("1 - Choose Log file")
+            print("2 - Edit Filters")
+            print("3 - Start Reading")
+            print("0 - Exit")
+            print()
 
-start()
+            choice = input("choice? ")
+
+            if choice == "1":
+                choose_log()
+            elif choice == "2":
+                edit_filters()
+            elif choice == "3":
+                start()
+            elif choice == "0":
+                print("Exiting...")
+                break
+            else:
+                print("Invalid choice, try again.")
+
+            input("\nPress Enter to continue...")  # Pause so user can see messages
+
+    except KeyboardInterrupt:
+        print("\nProgram interrupted. Exiting safely...")
+    except Exception as e:
+        print(f"An unexpected error occurred in main(): {e}")
+
+
+if __name__ == "__main__":
+    main()
